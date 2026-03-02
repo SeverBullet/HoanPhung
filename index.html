@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3D Heart Galaxy - Optimized</title>
+<title>3D Heart Galaxy - Perfect Harmony</title>
 
 <style>
 body{
@@ -23,12 +23,13 @@ canvas{display:block;}
     justify-content:center;
     align-items:center;
     z-index:999;
+    transition: 0.8s;
 }
 #intro-text{
     color:white;
-    font-size:50px;
+    font-size:32px;
     font-weight:bold;
-    letter-spacing:6px;
+    letter-spacing:4px;
     animation:blink 1s infinite;
     text-align: center;
 }
@@ -39,37 +40,28 @@ canvas{display:block;}
     100%{opacity:1;}
 }
 
-/* PHẦN CHỮ STATUS ĐÃ ĐƯỢC SỬA LẠI TO HƠN */
 #status{
     position:absolute;
-    bottom:10%; /* Đẩy lên cao hơn một chút so với mép dưới */
+    top:30%; /* Giữ chữ ở trên cao thoáng đãng */
     left:50%;
     transform:translateX(-50%);
     color:#ff4d4d;
-    font-size:24px; /* Tăng kích thước chữ */
+    font-size:20px;
     font-weight: bold;
     letter-spacing:2px;
     text-align: center;
     width: 90%;
-    text-shadow:0 0 15px #ff2121, 0 0 5px #fff; /* Đổ bóng rực rỡ hơn */
-    pointer-events: none; /* Tránh việc chạm vào chữ làm cản trở click vào trái tim */
+    text-shadow:0 0 15px #ff2121, 0 0 5px #fff;
+    pointer-events: none;
     text-transform: uppercase;
-}
-
-/* TỐI ƯU CHO ĐIỆN THOẠI */
-@media (max-width: 768px) {
-    #status {
-        font-size: 26px; /* Chữ to hơn nữa trên điện thoại */
-        bottom: 15%;
-    }
-    #intro-text {
-        font-size: 40px;
-    }
+    opacity: 0;
+    transition: 1s;
+    z-index: 10;
 }
 
 #my-photo{
     position:absolute;
-    top:50%;
+    top:45%;
     left:50%;
     transform:translate(-50%,-50%);
     max-width:85%;
@@ -108,52 +100,28 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 document.body.appendChild(renderer.domElement);
 
+const mainGroup = new THREE.Group();
+scene.add(mainGroup);
+mainGroup.visible = false;
+
 /* SAO NỀN */
 const starGeo = new THREE.BufferGeometry();
-const starCount = 800;
-const starPos = new Float32Array(starCount * 3);
-for(let i=0;i<starCount;i++){
+const starPos = new Float32Array(800 * 3);
+for(let i=0;i<800;i++){
     starPos[i*3]=(Math.random()-0.5)*120;
     starPos[i*3+1]=(Math.random()-0.5)*120;
     starPos[i*3+2]=(Math.random()-0.5)*120;
 }
 starGeo.setAttribute('position', new THREE.BufferAttribute(starPos,3));
-const stars = new THREE.Points(
-    starGeo,
-    new THREE.PointsMaterial({color:0xffffff,size:0.06,transparent:true,opacity:0.6})
-);
+const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({color:0xffffff,size:0.06,transparent:true,opacity:0.6}));
 scene.add(stars);
 
-/* MƯA SAO BĂNG */
-const meteors=[];
-function createMeteor(){
-    const geometry=new THREE.BufferGeometry();
-    geometry.setAttribute('position',
-        new THREE.BufferAttribute(new Float32Array([0,0,0,-1,1,0]),3)
-    );
-    const line=new THREE.Line(
-        geometry,
-        new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:0.8})
-    );
-    function reset(){
-        line.position.set((Math.random()-0.5)*80, Math.random()*40+10, (Math.random()-0.5)*40);
-    }
-    reset();
-    return{ mesh:line, speed:Math.random()*0.15+0.05, reset:reset };
-}
-for(let i=0;i<40;i++){
-    const m=createMeteor();
-    meteors.push(m);
-    scene.add(m.mesh);
-}
-
 /* TRÁI TIM 3D */
-const particleCount=7000;
+const particleCount=8500;
 const heartGeo=new THREE.BufferGeometry();
 const positions=[];
 const colors=[];
 let count=0;
-
 while(count<particleCount){
     let x=(Math.random()-0.5)*3;
     let y=(Math.random()-0.5)*3;
@@ -161,77 +129,107 @@ while(count<particleCount){
     let f=Math.pow(x*x+(9/4)*y*y+z*z-1,3)-x*x*Math.pow(z,3)-(9/80)*y*y*Math.pow(z,3);
     if(f<=0){
         positions.push(x,z,y);
-        colors.push(1,Math.random()*0.15,Math.random()*0.2);
+        colors.push(1,Math.random()*0.1,Math.random()*0.2);
         count++;
     }
 }
 heartGeo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
 heartGeo.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
+const heart=new THREE.Points(heartGeo, new THREE.PointsMaterial({size:0.025, vertexColors:true, transparent:true, opacity:0.95}));
+mainGroup.add(heart);
 
-const heart=new THREE.Points(
-    heartGeo,
-    new THREE.PointsMaterial({size:0.025, vertexColors:true, transparent:true, opacity:0.9})
-);
-scene.add(heart);
-camera.position.z=4.5;
+/* ĐĨA THAN CHỮ - ĐÃ KÉO SÁT TIM & NÂNG CAO TRÁNH CHẠM MÉP */
+function createVinylDisk(text) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 1024; canvas.height = 1024;
+    ctx.beginPath(); ctx.arc(512, 512, 500, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(20, 20, 20, 0.4)'; ctx.fill();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)'; ctx.lineWidth = 1;
+    for (let i = 150; i < 500; i += 12) {
+        ctx.beginPath(); ctx.arc(512, 512, i, 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.font = 'Bold 42px Arial'; ctx.fillStyle = '#ff4d4d'; ctx.textAlign = 'center';
+    ctx.shadowBlur = 15; ctx.shadowColor = '#ff2121';
+    const radius = 380; const repeat = 3; 
+    for (let j = 0; j < repeat; j++) {
+        for (let i = 0; i < text.length; i++) {
+            const angle = ((i / text.length) * (Math.PI * 2) / repeat) + (j * (Math.PI * 2) / repeat);
+            ctx.save();
+            ctx.translate(512 + Math.cos(angle) * radius, 512 + Math.sin(angle) * radius);
+            ctx.rotate(angle + Math.PI / 2);
+            ctx.fillText(text[i], 0, 0);
+            ctx.restore();
+        }
+    }
+    const texture = new THREE.CanvasTexture(canvas);
+    const disk = new THREE.Mesh(new THREE.CircleGeometry(3.5, 64), new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
+    
+    // NGHIÊNG ĐĨA VÀ ĐẨY LÊN SÁT ĐUÔI TIM
+    disk.rotation.x = -Math.PI / 2.2; // Độ nghiêng vừa phải để không bị lún màn hình
+    disk.position.y = -1.2; // Đã kéo gần lên đuôi trái tim (trước là -1.5)
+    return disk;
+}
+const vinylDisk = createVinylDisk(" FOREVER LOVE • MY ONLY GALAXY • HAPPY EVERYDAY • ");
+mainGroup.add(vinylDisk);
+
+// ĐẨY CẢ CỤM LÊN CAO HƠN MỘT CHÚT ĐỂ ĐĨA KHÔNG CHẠM CẠNH DƯỚI
+mainGroup.position.y = 1.0; 
+camera.position.set(0, 1.2, 6.5); 
 
 /* ANIMATION */
 let time=0;
-let visible=false;
-const photo=document.getElementById("my-photo");
-const intro=document.getElementById("intro-screen");
-const music=document.getElementById("bg-music");
+let isPhotoVisible=false;
+let introHidden = false;
 
 function animate(){
     requestAnimationFrame(animate);
     time+=0.015;
-
-    if(!visible){
+    if(!isPhotoVisible){
         let scale=1+Math.sin(time*1.5)*0.06;
         heart.scale.set(scale,scale,scale);
         heart.rotation.y+=0.005;
+        vinylDisk.rotation.z -= 0.003; 
     }
-
-    meteors.forEach(m=>{
-        m.mesh.position.x+=m.speed;
-        m.mesh.position.y-=m.speed;
-        if(m.mesh.position.y<-20 || m.mesh.position.x>40) m.reset();
-    });
-
     renderer.render(scene,camera);
 }
 animate();
 
-/* CLICK INTRO */
-intro.addEventListener("click",()=>{
-    intro.style.transition="0.8s";
-    intro.style.opacity="0";
-    setTimeout(()=>intro.style.display="none",800);
-    music.play().catch(()=>{});
-});
+/* CLICK EVENTS */
+const intro = document.getElementById("intro-screen");
+const photo = document.getElementById("my-photo");
+const statusTxt = document.getElementById("status");
+const music = document.getElementById("bg-music");
 
-/* CLICK ĐỂ HIỆN ẢNH - ĐÃ NỚI RỘNG VÙNG CHẠM CHO ĐIỆN THOẠI */
-window.addEventListener("click",(e)=>{
-    if(intro.style.display!=="none") return;
+window.addEventListener("click", (e) => {
+    if (!introHidden) {
+        intro.style.opacity = "0";
+        setTimeout(() => {
+            intro.style.display = "none";
+            mainGroup.visible = true;
+            statusTxt.style.opacity = "1";
+        }, 800);
+        music.play().catch(() => {});
+        introHidden = true;
+        return;
+    }
+    const mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+    const mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
 
-    const mouseX=(e.clientX/window.innerWidth)*2-1;
-    const mouseY=-(e.clientY/window.innerHeight)*2+1;
-
-    // Tăng vùng nhận diện từ 0.3 lên 0.5 để dễ bấm hơn trên điện thoại
-    if(Math.abs(mouseX)<0.5 && Math.abs(mouseY)<0.5){
-        visible=!visible;
-        heart.visible=!visible;
-        photo.style.opacity=visible?1:0;
+    // Vùng chạm khớp với vị trí mới của trái tim (đã đẩy lên Y=0.8)
+    if (Math.abs(mouseX) < 0.5 && (mouseY > -0.4 && mouseY < 0.6)) {
+        isPhotoVisible = !isPhotoVisible;
+        mainGroup.visible = !isPhotoVisible;
+        photo.style.opacity = isPhotoVisible ? 1 : 0;
+        statusTxt.style.opacity = isPhotoVisible ? 0 : 1;
     }
 });
 
 window.addEventListener("resize",()=>{
-    camera.aspect=window.innerWidth/window.innerHeight;
+    camera.aspect=window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth,window.innerHeight);
+    renderer.setSize(window.innerWidth, window.innerHeight);
 });
 </script>
-
 </body>
 </html>
-
