@@ -163,18 +163,18 @@ function createVinylDisk(text) {
         }
     }
     const texture = new THREE.CanvasTexture(canvas);
-    const disk = new THREE.Mesh(new THREE.CircleGeometry(3.5, 64), new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
+    const disk = new THREE.Mesh(new THREE.CircleGeometry(2.2, 64), new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
     
     // NGHIÊNG ĐĨA VÀ ĐẨY LÊN SÁT ĐUÔI TIM
     disk.rotation.x = -Math.PI / 2.2; // Độ nghiêng vừa phải để không bị lún màn hình
-    disk.position.y = -1.2; // Đã kéo gần lên đuôi trái tim (trước là -1.5)
+    disk.position.y = -1.0; // Đã kéo gần lên đuôi trái tim (trước là -1.5)
     return disk;
 }
 const vinylDisk = createVinylDisk(" FOREVER LOVE • MY ONLY GALAXY • HAPPY EVERYDAY • ");
 mainGroup.add(vinylDisk);
 
 // ĐẨY CẢ CỤM LÊN CAO HƠN MỘT CHÚT ĐỂ ĐĨA KHÔNG CHẠM CẠNH DƯỚI
-mainGroup.position.y = 1.0; 
+mainGroup.position.y = 0.8; 
 camera.position.set(0, 1.2, 6.5); 
 
 /* ANIMATION */
